@@ -30,7 +30,6 @@ import logging
 import traceback
 import re
 
-from appdirs import user_cache_dir, user_config_dir, user_data_dir
 from serial import SerialException
 
 from . import printcore
@@ -43,7 +42,7 @@ from .settings import Settings, BuildDimensionsSetting
 from .power import powerset_print_start, powerset_print_stop
 from printrun import gcoder
 from .rpc import ProntRPC
-from printrun.spoolmanager import spoolmanager
+from printrun import spoolmanager
 
 if os.name == "nt":
     try:
@@ -170,9 +169,6 @@ class pronsole(cmd.Cmd):
                            "online": "%(bold)s%(green)s%(port)s%(white)s %(extruder_temp_fancy)s%(progress_fancy)s>%(normal)s "}
         self.spool_manager = spoolmanager.SpoolManager(self)
         self.current_tool = 0   # Keep track of the extruder being used
-        self.cache_dir = os.path.join(user_cache_dir("Printrun"))
-        self.config_dir = os.path.join(user_config_dir("Printrun"))
-        self.data_dir = os.path.join(user_data_dir("Printrun"))
 
     #  --------------------------------------------------------------
     #  General console handling
@@ -204,12 +200,7 @@ class pronsole(cmd.Cmd):
                 self.old_completer = readline.get_completer()
                 readline.set_completer(self.complete)
                 readline.parse_and_bind(self.completekey + ": complete")
-                defaulthistory = os.path.expanduser(self.history_file)
                 history = os.path.expanduser(self.history_file)
-                if not os.path.exists(defaulthistory):
-                    if not os.path.exists(self.data_dir):
-                        os.makedirs(self.data_dir)
-                    history = os.path.join(self.data_dir, "history")
                 if os.path.exists(history):
                     readline.read_history_file(history)
             except ImportError:
@@ -607,22 +598,17 @@ class pronsole(cmd.Cmd):
         finally:
             self.processing_rc = False
 
-    def load_default_rc(self, rc_filename=None):
-        defaultconfig = os.path.expanduser("~/.pronsolerc")
-        if rc_filename:
-            config = rc_filename
-        elif hasattr(sys, "frozen") and sys.frozen in ["windows_exe", "console_exe"]:
-            config = "printrunconf.ini"
-        elif os.path.exists(defaultconfig):
-            config = defaultconfig
-        else:
-            if not os.path.exists(self.config_dir):
-                os.makedirs(self.config_dir)
-            config = os.path.join(self.config_dir, "pronsolerc")
+    def load_default_rc(self, rc_filename = ".pronsolerc"):
+        if rc_filename == ".pronsolerc" and hasattr(sys, "frozen") and sys.frozen in ["windows_exe", "console_exe"]:
+            rc_filename = "printrunconf.ini"
         try:
-            self.load_rc(config)
+            try:
+                self.load_rc(os.path.join(os.path.expanduser("~"), rc_filename))
+            except IOError:
+                self.load_rc(rc_filename)
         except IOError:
-            self.logError(_("Error loading config file \"%s\".") % config)
+            # make sure the filename is initialized
+            self.rc_filename = os.path.abspath(os.path.join(os.path.expanduser("~"), rc_filename))
 
     def save_in_rc(self, key, definition):
         """
@@ -642,14 +628,9 @@ class pronsole(cmd.Cmd):
         try:
             written = False
             if os.path.exists(self.rc_filename):
-                if not os.path.exists(self.cache_dir):
-                    os.makedirs(self.cache_dir)
-                configcache = os.path.join(self.cache_dir, os.path.basename(self.rc_filename))
-                configcachebak = configcache + "~bak"
-                configcachenew = configcache + "~new"
-                shutil.copy(self.rc_filename, configcachebak)
-                rci = codecs.open(configcachebak, "r", "utf-8")
-            rco = codecs.open(configcachenew, "w", "utf-8")
+                shutil.copy(self.rc_filename, self.rc_filename + "~bak")
+                rci = codecs.open(self.rc_filename + "~bak", "r", "utf-8")
+            rco = codecs.open(self.rc_filename + "~new", "w", "utf-8")
             if rci is not None:
                 overwriting = False
                 for rc_cmd in rci:
@@ -670,7 +651,7 @@ class pronsole(cmd.Cmd):
             if rci is not None:
                 rci.close()
             rco.close()
-            shutil.move(configcachenew, self.rc_filename)
+            shutil.move(self.rc_filename + "~new", self.rc_filename)
             # if definition != "":
             #    self.log("Saved '"+key+"' to '"+self.rc_filename+"'")
             # else:

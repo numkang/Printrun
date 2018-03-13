@@ -85,6 +85,11 @@ def MainToolbar(root, parentpanel = None, use_wrapsizer = False):
     root.offbtn = make_autosize_button(parentpanel, _("Off"), root.off, _("Turn printer off"), self)
     root.printerControls.append(root.offbtn)
 
+    root.processbtn = make_autosize_button(parentpanel, _("Process"), root.process, _("Processing..."), self)
+    root.stiffness = wx.ComboBox(parentpanel, -1, choices = ["50","75","100"], style = wx.CB_DROPDOWN, size = (100, -1))
+    self.Add(root.stiffness)
+    self.Add(wx.StaticText(parentpanel, -1, "g/mm"), 0, wx.RIGHT | wx.ALIGN_CENTER, 0)
+
     self.AddStretchSpacer(prop = 4)
 
     if root.settings.lockbox:

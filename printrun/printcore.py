@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Printrun.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = "1.6.0"
+__version__ = "2015.03.10"
 
 from serialWrapper import Serial, SerialException, PARITY_ODD, PARITY_NONE
 from select import error as SelectError
@@ -117,6 +117,7 @@ class printcore():
             self.connect(port, baud)
         self.xy_feedrate = None
         self.z_feedrate = None
+        self.cmdline = None
 
     def addEventHandler(self, handler):
         '''
@@ -249,6 +250,17 @@ class printcore():
             self.printer.setDTR(1)
             time.sleep(0.2)
             self.printer.setDTR(0)
+
+    def getData(self):
+        rx_buf = [self.printer.read(60)] # Try reading a large chunk of data, blocking for timeout secs.        
+        while True: # Loop to read remaining data, to end of receive buffer.
+            pending = self.printer.inWaiting()
+            if pending:
+                rx_buf.append(self.printer.read(pending)) # Append read chunks to the list.
+            else:
+                break
+        rx_data = ''.join(rx_buf) # Join the chunks, to get a string of serial data.
+        return rx_data
 
     def _readline(self):
         try:
@@ -615,6 +627,7 @@ class printcore():
 
             # Strip comments
             tline = gcoder.gcode_strip_comment_exp.sub("", tline).strip()
+            self.cmdline = tline
             if tline:
                 self._send(tline, self.lineno, True)
                 self.lineno += 1

@@ -18,35 +18,22 @@ A precompiled version is available at http://koti.kapsi.fi/~kliment/printrun/
 
 A precompiled version is available at http://koti.kapsi.fi/~kliment/printrun/
 
-Note for OSX users: if OSX tells you the file is corrupted, you don't need to redownload it. Instead, you need to allow OSX to run unsigned apps. To do this, run 
-`sudo spctl --master-disable`
-
-
 ## Linux
 ### Ubuntu/Debian
 
-You can install Printrun from official packages (*):
-```
-sudo apt install printrun
-```
+You can run Printrun directly from source. Fetch and install the dependencies using
 
-Or you can run Printrun directly from source.
+1. `sudo apt-get install python-serial python-wxgtk2.8 python-pyglet python-numpy cython python-libxml2 python-gobject python-dbus python-psutil python-cairosvg libpython-dev git`
 
-1. Fetch and install the dependencies using (**):
-```
-sudo apt-get install python-serial python-wxgtk2.8 python-pyglet python-numpy cython python-libxml2 python-gobject python-dbus python-psutil python-cairosvg libpython-dev git
-```
-    
-2. Clone the repository
-```
-git clone https://github.com/kliment/Printrun.git
-```
+Clone the repository
 
-3. You can start using Printrun from the Printrun directory created by the git clone command.
+`git clone https://github.com/kliment/Printrun.git`
 
-(*) Please be aware that the Printrun package available in Ubuntu Yakkety Yak, or later, and Debian Stretch/Sid repositories, is known to be affected by issue [#615](https://github.com/kliment/Printrun/issues/615).
+and you can start using Printrun from the Printrun directory created by the git clone command.
 
-(**) Users of Ubuntu Xenial Xerus or later and Debian Jessie or later won't find the package "python-wxgtk2.8" available, having been replaced by "python-wxgtk3.0". Running Printrun with "python-wxgtk3.0" instead, is possible but it is known to be affected by issue [#615](https://github.com/kliment/Printrun/issues/615).
+Users of Ubuntu Xenial Xerus or later and Debian Jessie or later won't find the package "python-wxgtk2.8" available, having been replaced by "python-wxgtk3.0". Running Printrun with "python-wxgtk3.0" instead, is possible but it is known to be affected by issue #615.
+
+A Printrun preliminary package is already available in Ubuntu Yakkety Yak and Debian Stretch/Sid repositories. Please be aware that this initial package is also known to be affected by issue #615.
 
 ### Chrome OS 
 
@@ -62,19 +49,19 @@ where `<username>` should be your username. Log out and in to make this group ch
 
 You can install Printrun from official packages. Install the whole package using
 
-`sudo dnf install printrun`
+`sudo yum install printrun`
 
 Or get only apps you need by
 
-`sudo dnf install pronsole` or `pronterface` or `plater`
+`sudo yum install pronsole` or `pronterface` or `plater`
 
-Adding `--enablerepo updates-testing` option to `dnf` might sometimes give you newer packages (but also not very tested).
+Adding `--enablerepo updates-testing` option to `yum` might give you newer packages (but also not very tested).
 
 You can also run Printrun directly from source, if the packages are too old for you. Fetch and install the dependencies using
 
-1. `sudo dnf install pyserial wxPython python-pyglet python-cairosvg`
+1. `sudo yum install pyserial wxPython python-pyglet python-cairosvg`
 
-Optional: `sudo dnf install simarrange`
+Optional: `sudo yum install skeinforge simarrange`
 
 ### Archlinux
 

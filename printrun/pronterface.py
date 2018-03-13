@@ -31,7 +31,7 @@ except ImportError: import json
 
 from . import pronsole
 from . import printcore
-from printrun.spoolmanager import spoolmanager_gui
+from printrun import spoolmanager
 
 from .utils import install_locale, setup_logging, dosify, \
     iconfile, configfile, format_time, format_duration, \
@@ -809,7 +809,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
 
     def show_spool_manager(self, event):
         """Show Spool Manager Window"""
-        spoolmanager_gui.SpoolManagerMainWindow(self, self.spool_manager).Show()
+        spoolmanager.SpoolManagerMainWindow(self, self.spool_manager).Show()
 
     def about(self, event):
         """Show about dialog"""
@@ -2130,6 +2130,15 @@ Printrun. If not, see <http://www.gnu.org/licenses/>."""
             self.log(_("Failed to handle button"))
             self.cur_button = None
             raise
+
+    def process(self, event = None):
+        self.log(_("Hello World..."))
+        try:
+            if int(self.stiffness.GetValue()):
+                stiff = int(self.stiffness.GetValue())
+                self.log(_(stiff))
+        except:
+            self.log(_("Please input a correct stiffness"))        
 
     #  --------------------------------------------------------------
     #  Macros handling
